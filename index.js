@@ -1,10 +1,22 @@
 const app = require('./src/app');
-const dotenv = require('dotenv');
+const { initializeDatabase } = require('./src/config/database');
+const logger = require('./src/config/logger');
 
-dotenv.config();
+const PORT = process.env.PORT || 3001;
 
-const port = process.env.PORT || 3000;
+// Initialise database
+initializeDatabase();
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+const server = app.listen(PORT, () => {
+  logger.info(`Classification & Notification Service running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, closing server...');
+  server.close(() => {
+    logger.info('Server closed');
+    process.exit(0);
+  });
 });

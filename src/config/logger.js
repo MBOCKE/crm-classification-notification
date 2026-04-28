@@ -1,15 +1,27 @@
-const { createLogger, transports, format } = require('winston');
+const winston = require('winston');
+const path = require('path');
+require('dotenv').config();
 
-const logger = createLogger({
-  level: 'info',
-  format: format.combine(
-    format.timestamp(),
-    format.prettyPrint()
+const logDir = process.env.LOG_DIR || './logs';
+const level = process.env.LOG_LEVEL || 'info';
+
+const logger = winston.createLogger({
+  level,
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
   ),
   transports: [
-    new transports.Console(),
-    new transports.File({ filename: 'logs/app.log' })
+    new winston.transports.File({ filename: path.join(logDir, 'error.log'), level: 'error' }),
+    new winston.transports.File({ filename: path.join(logDir, 'combined.log') })
   ]
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple()
+  }));
+}
 
 module.exports = logger;
