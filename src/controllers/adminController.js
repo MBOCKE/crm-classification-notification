@@ -59,6 +59,16 @@ exports.activateRule = (req, res) => {
 exports.getAvailableFactors = (req, res) => res.json(AVAILABLE_FACTORS);
 exports.getScenarios = (req, res) => res.json(SCENARIO_TEMPLATES);
 
+exports.getAuditLogs = (req, res) => {
+  const logs = db.prepare(`
+    SELECT id, action, changes, performed_by AS user, ip_address AS ipAddress, created_at
+    FROM rules_audit_log
+    ORDER BY created_at DESC
+    LIMIT 50
+  `).all();
+  res.json(logs);
+};
+
 exports.testClassification = (req, res) => {
   const { customerData, testWeights } = req.body;
   const testEngine = new AdvancedRuleEngine();

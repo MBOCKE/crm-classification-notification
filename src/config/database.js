@@ -30,11 +30,30 @@ function initializeDatabase() {
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
+      phone TEXT,
       total_spent REAL DEFAULT 0,
       current_tier TEXT DEFAULT 'NEW',
+      active INTEGER DEFAULT 1,
       last_activity_date DATE DEFAULT CURRENT_DATE,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Transactions table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS transactions (
+      id TEXT PRIMARY KEY,
+      customer_id TEXT NOT NULL,
+      amount REAL DEFAULT 0,
+      status TEXT DEFAULT 'completed',
+      category TEXT DEFAULT 'purchase',
+      merchant TEXT,
+      description TEXT,
+      metadata TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
     );
   `);
 
@@ -106,7 +125,21 @@ function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_notifications_customer ON notifications(customer_id);
     CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(customer_id, is_read);
     CREATE INDEX IF NOT EXISTS idx_classification_history_customer ON classification_history(customer_id);
+    CREATE INDEX IF NOT EXISTS idx_transactions_customer ON transactions(customer_id);
   `);
+
+  // Ensure optional columns exist for older database builds
+  try {
+    db.prepare('ALTER TABLE customers ADD COLUMN phone TEXT').run();
+  } catch (error) {
+    // column already exists or cannot be altered, ignore
+  }
+
+  try {
+    db.prepare('ALTER TABLE customers ADD COLUMN active INTEGER DEFAULT 1').run();
+  } catch (error) {
+    // column already exists or cannot be altered, ignore
+  }
 
   console.log('✅ Database initialised');
 }

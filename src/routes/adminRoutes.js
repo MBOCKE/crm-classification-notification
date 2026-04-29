@@ -15,6 +15,7 @@ router.post('/rules/save', adminController.saveRule);
 router.post('/rules/activate/:ruleId', adminController.activateRule);
 router.get('/factors', adminController.getAvailableFactors);
 router.get('/scenarios', adminController.getScenarios);
+router.get('/logs', adminController.getAuditLogs);
 router.post('/rules/test', adminController.testClassification);
 
 module.exports = router;
