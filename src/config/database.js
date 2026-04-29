@@ -11,6 +11,19 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL'); // better concurrency
 
 function initializeDatabase() {
+  // Users table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      name TEXT NOT NULL,
+      roles TEXT NOT NULL DEFAULT '["user"]',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   // Customers table
   db.exec(`
     CREATE TABLE IF NOT EXISTS customers (

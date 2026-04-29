@@ -1,9 +1,21 @@
 // scripts/seedDatabase.js
 const { db, initializeDatabase } = require('../src/config/database');
 const { AdvancedRuleEngine } = require('../src/services/ruleEngine');
+const bcrypt = require('bcrypt');
 
 // Initialise database (creates tables if not exist)
 initializeDatabase();
+
+// Create default admin user
+const createDefaultUser = async () => {
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const insertUser = db.prepare(`
+    INSERT OR IGNORE INTO users (email, password, name, roles)
+    VALUES (?, ?, ?, ?)
+  `);
+  insertUser.run('admin@example.com', hashedPassword, 'Admin User', JSON.stringify(['admin']));
+  console.log('✅ Default admin user created (email: admin@example.com, password: admin123)');
+};
 
 // Sample customers with realistic data
 const sampleCustomers = [
@@ -75,3 +87,6 @@ for (const cust of sampleCustomers) {
 }
 
 console.log('\n✅ Seeding complete. Run `npm start` to start the service.');
+
+// Create default user
+createDefaultUser().catch(console.error);

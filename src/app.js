@@ -11,6 +11,7 @@ const logger = require('./config/logger');
 const classificationRoutes = require('./routes/classificationRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
 const internalRoutes = require('./routes/internalRoutes');
 
 const app = express();
@@ -41,6 +42,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes (protected by JWT)
+app.use('/api/auth', authRoutes);
 app.use('/api/v1/classify', authMiddleware, classificationRoutes);
 app.use('/api/v1/notifications', authMiddleware, notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);   // admin routes include auth+admin check inside
